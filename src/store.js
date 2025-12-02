@@ -1,32 +1,33 @@
-export const initialStore=()=>{
-  return{
-    message: null,
-    todos: [
-      {
-        id: 1,
-        title: "Make the bed",
-        background: null,
-      },
-      {
-        id: 2,
-        title: "Do my homework",
-        background: null,
-      }
-    ]
+import { createContext, useContext, useReducer } from "react";
+
+const initialState = {
+  favorites: []
+};
+
+function reducer(state, action) {
+  switch (action.type) {
+    case "ADD_FAVORITE":
+      if (state.favorites.find(fav => fav._id === action.payload._id)) return state;
+      return {
+        ...state,
+        favorites: [...state.favorites, action.payload]
+      };
+    default:
+      return state;
   }
 }
 
-export default function storeReducer(store, action = {}) {
-  switch(action.type){
-    case 'add_task':
+const StoreContext = createContext();
 
-      const { id,  color } = action.payload
+export function StoreProvider({ children }) {
+  const [store, dispatch] = useReducer(reducer, initialState);
+  return (
+    <StoreContext.Provider value={{ store, dispatch }}>
+      {children}
+    </StoreContext.Provider>
+  );
+}
 
-      return {
-        ...store,
-        todos: store.todos.map((todo) => (todo.id === id ? { ...todo, background: color } : todo))
-      };
-    default:
-      throw Error('Unknown action.');
-  }    
+export function useStore() {
+  return useContext(StoreContext);
 }
